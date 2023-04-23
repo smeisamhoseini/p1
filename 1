@@ -1,0 +1,56 @@
+import math
+
+e12 = [1.0, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2]
+e24 = [1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0, 3.3, 3.6, 3.9, 4.3, 4.7, 5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1]
+default_tolerance = 5
+
+def parallel_resistance(resistance_value, tolerance_value=default_tolerance):
+    possible_resistances = []
+    for r1 in e12:
+        for r2 in e12:
+            parallel_resistance = (r1*r2)/(r1+r2)
+            tolerance = abs(parallel_resistance-resistance_value)/resistance_value
+            if tolerance <= tolerance_value/100:
+                possible_resistances.append((r1, r2, parallel_resistance, tolerance))
+    possible_resistances.sort(key=lambda x: x[3])  # sort by tolerance
+    return possible_resistances
+
+def series_resistance(resistance_value, tolerance_value=default_tolerance):
+    possible_resistances = []
+    for r1 in e24:
+        for r2 in e24:
+            series_resistance = r1+r2
+            tolerance = abs(series_resistance-resistance_value)/resistance_value
+            if tolerance <= tolerance_value/100:
+                possible_resistances.append((r1, r2, series_resistance, tolerance))
+    possible_resistances.sort(key=lambda x: x[3])  # sort by tolerance
+    return possible_resistances
+
+if __name__ == "__main__":
+    while True:
+        resistance_value = input("Enter the required resistance value (or enter 'q' to quit): ")
+        
+        if resistance_value == 'q':
+            break
+            
+        tolerance_value = input("Enter the required tolerance value (or press enter for default 5% tolerance): ")
+        
+        if not tolerance_value:
+            tolerance = default_tolerance
+        else:
+            tolerance = float(tolerance_value)
+        
+        resistance_value = float(resistance_value)
+        parallel_results = parallel_resistance(resistance_value, tolerance)
+        series_results = series_resistance(resistance_value, tolerance)
+        if len(parallel_results) == 0 and len(series_results) == 0:
+            print("No possible resistance values found")
+        else:
+            if len(parallel_results) > 0:
+                print(f"Parallel resistances:")
+                for res in parallel_results:
+                    print(f"({res[0]}||{res[1]}) = {res[2]:.1f} (tolerance: {res[3]:.1%})")
+            if len(series_results) > 0:
+                print(f"Series resistances:")
+                for res in series_results:
+                    print(f"({res[0]}+{res[1]}) = {res[2]:.1f} (tolerance: {res[3]:.1%})")
